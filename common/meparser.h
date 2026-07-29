@@ -22,17 +22,18 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include "ubytearray.h"
 #include "treemodel.h"
 #include "ffsparser.h"
-#include "sha256.h"
+
+#include "digest/sha2.h"
 
 #ifdef U_ENABLE_ME_PARSING_SUPPORT
-class MeParser 
+class MeParser
 {
 public:
     // Default constructor and destructor
     MeParser(TreeModel* treeModel, FfsParser* parser) : model(treeModel), ffsParser(parser) {}
     ~MeParser() {}
 
-    // Returns messages 
+    // Returns messages
     std::vector<std::pair<UString, UModelIndex> > getMessages() const { return messagesVector; }
     // Clears messages
     void clearMessages() { messagesVector.clear(); }
@@ -47,20 +48,20 @@ private:
     void msg(const UString message, const UModelIndex index = UModelIndex()) {
         messagesVector.push_back(std::pair<UString, UModelIndex>(message, index));
     }
-
-    USTATUS parseFptRegion(const UByteArray & region, const UModelIndex & parent, UModelIndex & index);
-    USTATUS parseIfwi16Region(const UByteArray & region, const UModelIndex & parent, UModelIndex & index);
-    USTATUS parseIfwi17Region(const UByteArray & region, const UModelIndex & parent, UModelIndex & index);
+    
+    USTATUS parseFptRegion(const UByteArray & region, const UModelIndex & parent, UModelIndex & index, UString & meVersion);
+    USTATUS parseIfwi16Region(const UByteArray & region, const UModelIndex & parent, UModelIndex & index, UString & meVersion);
+    USTATUS parseIfwi17Region(const UByteArray & region, const UModelIndex & parent, UModelIndex & index, UString & meVersion);
 };
 #else
-class MeParser 
+class MeParser
 {
 public:
     // Default constructor and destructor
     MeParser(TreeModel* treeModel, FfsParser* parser) { U_UNUSED_PARAMETER(treeModel); U_UNUSED_PARAMETER(parser); }
     ~MeParser() {}
 
-    // Returns messages 
+    // Returns messages
     std::vector<std::pair<UString, UModelIndex> > getMessages() const { return std::vector<std::pair<UString, UModelIndex> >(); }
     // Clears messages
     void clearMessages() {}

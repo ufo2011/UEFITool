@@ -697,9 +697,9 @@ int CBString::find (const CBString& b, int pos) const {
 int CBString::find (const char * b, int pos) const {
 int ii, j;
 unsigned char c0;
-register int i, l;
-register unsigned char cx;
-register unsigned char * pdata;
+int i, l;
+unsigned char cx;
+unsigned char * pdata;
 
 	if (NULL == b) {
 #ifdef BSTRLIB_THROWS_EXCEPTIONS
@@ -1539,7 +1539,7 @@ std::istream& operator >> (std::istream& sin, CBString& b) {
 	do {
 		b.gets ((bNgetc) istreamGets, &sin, '\n');
 		if (b.slen > 0 && b.data[b.slen-1] == '\n') b.slen--;
-	} while (b.slen == 0 && !sin.eof ());
+	} while (b.slen == 0 && !sin.eof() && !sin.fail());
  	return sin;
 }
 

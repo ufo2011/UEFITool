@@ -30,6 +30,7 @@ public:
         DUMP_CURRENT,
         DUMP_ALL,
         DUMP_BODY,
+        DUMP_UNC_DATA,
         DUMP_HEADER,
         DUMP_INFO,
         DUMP_FILE
@@ -38,7 +39,7 @@ public:
     static const UINT8 IgnoreSectionType = 0xFF;
 
     explicit FfsDumper(TreeModel * treeModel) : model(treeModel), dumped(false), 
-        counterHeader(0), counterBody(0), counterRaw(0), counterInfo(0) {}
+        counterHeader(0), counterBody(0), counterUncData(0), counterRaw(0), counterInfo(0) {}
     ~FfsDumper() {};
 
     USTATUS dump(const UModelIndex & root, const UString & path, const DumpMode dumpMode = DUMP_CURRENT, const UINT8 sectionType = IgnoreSectionType, const UString & guid = UString());
@@ -48,7 +49,7 @@ private:
     TreeModel* model;
     UString currentPath;
     bool dumped;
-    int counterHeader, counterBody, counterRaw, counterInfo;
+    int counterHeader, counterBody, counterUncData, counterRaw, counterInfo;
     std::set<UModelIndex> fileList;
 };
 #endif // FFSDUMPER_H

@@ -15,8 +15,8 @@
 #define HEXVIEWDIALOG_H
 
 #include <QDialog>
+#include <QHexView/qhexview.h>
 #include "../common/treemodel.h"
-#include "qhexedit2/qhexedit.h"
 #include "ui_hexviewdialog.h"
 
 class HexViewDialog : public QDialog
@@ -24,15 +24,21 @@ class HexViewDialog : public QDialog
     Q_OBJECT
 
 public:
+    enum HexViewType {
+        fullHexView,
+        bodyHexView,
+        uncompressedHexView
+    };
+    
     HexViewDialog(QWidget *parent = 0);
     ~HexViewDialog();
     Ui::HexViewDialog* ui;
 
-    void setItem(const UModelIndex & index, bool bodyOnly);
+    void setItem(const UModelIndex & index, HexViewType dataType);
     void setFont(const QFont &font);
-
+    
 private:
-    QHexEdit * hexView;
+    QHexView * hexView;
 };
 
 #endif // HEXVIEWDIALOG_H

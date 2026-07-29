@@ -45,14 +45,13 @@ public:
     UByteArray toUpper() { std::basic_string<char> s = d; std::transform(s.begin(), s.end(), s.begin(), ::toupper); return UByteArray(s); }
     uint32_t toUInt(bool* ok = NULL, const uint8_t base = 10) { return (uint32_t)strtoul(d.c_str(), NULL, base); }
 
-    int32_t size() const { return d.size();  }
-    int32_t count(char ch) const { return std::count(d.begin(), d.end(), ch); }
+    int32_t size() const { return (int32_t)d.size();  }
     char at(uint32_t i) const { return d.at(i); }
     char operator[](uint32_t i) const { return d[i]; }
     char& operator[](uint32_t i) { return d[i]; }
 
     bool startsWith(const UByteArray & ba) const { return 0 == d.find(ba.d, 0); }
-    int indexOf(const UByteArray & ba, int from = 0) const { return d.find(ba.d, from); }
+    int indexOf(const UByteArray & ba, int from = 0) const { return (int)d.find(ba.d, from); }
     int lastIndexOf(const UByteArray & ba, int from = 0) const {
         size_t old_index = d.npos;
         size_t index = d.find(ba.d, from);
@@ -60,15 +59,16 @@ public:
             old_index = index;
             index = d.find(ba.d, index + 1);
         }
-        return old_index;
+        return (int)old_index;
     }
 
     UByteArray left(int32_t len) const { return d.substr(0, len); }
-    UByteArray right(int32_t len) const { return d.substr(d.size() - 1 - len, len); }
+    UByteArray right(int32_t len) const { return d.substr(d.size() - len, len); }
     UByteArray mid(int32_t pos, int32_t len = -1) const { return d.substr(pos, len); }
 
     UByteArray & operator=(const UByteArray & ba) { d = ba.d; return *this; }
     UByteArray & operator+=(const UByteArray & ba) { d += ba.d; return *this; }
+    UByteArray & operator+=(const char c) { d += c; return *this; }
     bool operator== (const UByteArray & ba) const { return d == ba.d; }
     bool operator!= (const UByteArray & ba) const { return d != ba.d; }
     inline void swap(UByteArray &other) { std::swap(d, other.d); }
@@ -77,12 +77,11 @@ public:
         for (int32_t i = 0; i < size(); i++) {
             uint8_t low  = d[i] & 0x0F;
             uint8_t high = (d[i] & 0xF0) >> 4;
-            low += (low < 10 ? '0' : 'a');
-            high += (high < 10 ? '0' : 'a');
-            hex[2*i] = low;
-            hex[2*i + 1] = high;
+            low += (low < 10 ? '0' : 'a' - 10);
+            high += (high < 10 ? '0' : 'a' - 10);
+            hex[2*i] = high;
+            hex[2*i + 1] = low;
         }
-        std::reverse(hex.begin(), hex.end());
         return UByteArray(hex);
     }
 

@@ -19,6 +19,13 @@ enum ItemFixedState {
     Fixed
 };
 
+enum BootGuardMarking {
+    None = 0, // Needs to be zero
+    PartiallyInRange,
+    BootGuardFullyInRange,
+    VendorFullyInRange
+};
+
 #if defined(QT_CORE_LIB)
 // Use Qt classes
 #include <QAbstractItemModel>
@@ -37,7 +44,7 @@ enum ItemFixedState {
 
 #define UModelIndex QModelIndex
 #else
-// Use own implementation 
+// Use own implementation
 #include "ustring.h"
 #include "ubytearray.h"
 #include "basetypes.h"
@@ -86,17 +93,17 @@ private:
 #if defined(QT_CORE_LIB)
 class TreeModel : public QAbstractItemModel
 {
-    Q_OBJECT
 private:
     TreeItem *rootItem;
     bool markingEnabledFlag;
+    bool markingDarkModeFlag;
 
 public:
     QVariant data(const UModelIndex &index, int role) const;
     Qt::ItemFlags flags(const UModelIndex &index) const;
     QVariant headerData(int section, Qt::Orientation orientation,
         int role = Qt::DisplayRole) const;
-    TreeModel(QObject *parent = 0) : QAbstractItemModel(parent), markingEnabledFlag(true) {
+    TreeModel(QObject *parent = 0) : QAbstractItemModel(parent), markingEnabledFlag(true), markingDarkModeFlag(false) {
         rootItem = new TreeItem(0, Types::Root, 0, UString(), UString(), UString(), UByteArray(), UByteArray(), UByteArray(), true, false);
     }
 
@@ -108,6 +115,7 @@ class TreeModel
 private:
     TreeItem *rootItem;
     bool markingEnabledFlag;
+    bool markingDarkModeFlag;
 
     void dataChanged(const UModelIndex &, const UModelIndex &) {}
     void layoutAboutToBeChanged() {}
@@ -117,8 +125,8 @@ public:
     UString data(const UModelIndex &index, int role) const;
     UString headerData(int section, int orientation, int role = 0) const;
 
-    TreeModel() : markingEnabledFlag(false) {
-        rootItem = new TreeItem(0, Types::Root, 0, UString(), UString(), UString(), UByteArray(), UByteArray(), UByteArray(), TRUE, FALSE);
+    TreeModel() : markingEnabledFlag(false), markingDarkModeFlag(false) {
+        rootItem = new TreeItem(0, Types::Root, 0, UString(), UString(), UString(), UByteArray(), UByteArray(), UByteArray(), true, false);
     }
 
     bool hasIndex(int row, int column, const UModelIndex &parent = UModelIndex()) const {
@@ -136,6 +144,9 @@ public:
 
     bool markingEnabled() { return markingEnabledFlag; }
     void setMarkingEnabled(const bool enabled);
+
+    bool markingDarkMode() { return markingDarkModeFlag; }
+    void setMarkingDarkMode(const bool enabled);
 
     UModelIndex index(int row, int column, const UModelIndex &parent = UModelIndex()) const;
     UModelIndex parent(const UModelIndex &index) const;
@@ -163,30 +174,44 @@ public:
 
     UString info(const UModelIndex &index) const;
     void setInfo(const UModelIndex &index, const UString &info);
-    void addInfo(const UModelIndex &index, const UString &info, const bool append = TRUE);
+    void addInfo(const UModelIndex &index, const UString &info, const bool append = true);
 
     bool fixed(const UModelIndex &index) const;
     void setFixed(const UModelIndex &index, const bool fixed);
 
     bool compressed(const UModelIndex &index) const;
     void setCompressed(const UModelIndex &index, const bool compressed);
-
+    
+    UByteArray uncompressedData(const UModelIndex &index) const;
+    bool hasEmptyUncompressedData(const UModelIndex &index) const;
+    void setUncompressedData(const UModelIndex &index, const UByteArray &ucdata);
+    
     UINT8 marking(const UModelIndex &index) const;
     void setMarking(const UModelIndex &index, const UINT8 marking);
 
+    UByteArray full(const UModelIndex& index) const;
+    UINT32 fullSize(const UModelIndex& index) const;
+
     UByteArray header(const UModelIndex &index) const;
     bool hasEmptyHeader(const UModelIndex &index) const;
-
+    UINT32 headerSize(const UModelIndex& index) const;
+    
     UByteArray body(const UModelIndex &index) const;
     bool hasEmptyBody(const UModelIndex &index) const;
+    UINT32 bodySize(const UModelIndex& index) const;
 
     UByteArray tail(const UModelIndex &index) const;
     bool hasEmptyTail(const UModelIndex &index) const;
+    UINT32 tailSize(const UModelIndex& index) const;
 
     UByteArray parsingData(const UModelIndex &index) const;
     bool hasEmptyParsingData(const UModelIndex &index) const;
     void setParsingData(const UModelIndex &index, const UByteArray &pdata);
 
+    UByteArray alignmentBytes(const UModelIndex &index) const;
+    bool hasEmptyAlignmentBytes(const UModelIndex &index) const;
+    void setAlignmentBytes(const UModelIndex &index, const UByteArray &abytes);
+    
     UModelIndex addItem(const UINT32 offset, const UINT8 type, const UINT8 subtype,
         const UString & name, const UString & text, const UString & info,
         const UByteArray & header, const UByteArray & body, const UByteArray & tail,
@@ -195,7 +220,9 @@ public:
 
     UModelIndex findParentOfType(const UModelIndex & index, UINT8 type) const;
     UModelIndex findLastParentOfType(const UModelIndex & index, UINT8 type) const;
-    UModelIndex findByBase(UINT32 base) const;
+    UModelIndex findByBase(const UINT32 base, const UModelIndex& parent = UModelIndex()) const;
+
+    UModelIndex updatedIndex(const UModelIndex* oldIndex) const;
 };
 
 #if defined(QT_CORE_LIB)

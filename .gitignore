@@ -238,6 +238,7 @@ UEFITool.app/
 UEFITool/XCBuildData
 UEFIDump/UEFIDump
 UEFIExtract/UEFIExtract
+UEFIExtract/guids.csv
 UEFIFind/UEFIFind
 .qmake.stash
 CMakeCache.txt
@@ -248,3 +249,6 @@ DerivedData
 compile_commands.json
 CMakeScripts
 UEFITool/qrc_uefitool.cpp
+XcodeQT5
+XcodeQT6
+*.dSYM

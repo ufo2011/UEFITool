@@ -1,31 +1,71 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.22)
 
 PROJECT(UEFIFind)
+
+SET(CMAKE_CXX_STANDARD 11)
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET(CMAKE_CXX_EXTENSIONS OFF)
 
 SET(PROJECT_SOURCES
  uefifind_main.cpp
  uefifind.cpp
  ../common/guiddatabase.cpp
  ../common/types.cpp
+ ../common/filesystem.cpp
  ../common/descriptor.cpp
  ../common/ffs.cpp
  ../common/nvram.cpp
  ../common/nvramparser.cpp
  ../common/ffsparser.cpp
- ../common/ffsreport.cpp
- ../common/ffsutils.cpp
+ ../common/amd_microcode.cpp
+ ../common/fitparser.cpp
  ../common/peimage.cpp
  ../common/treeitem.cpp
  ../common/treemodel.cpp
  ../common/utility.cpp
+ ../common/brotli/common/constants.c
+ ../common/brotli/common/context.c
+ ../common/brotli/common/dictionary.c
+ ../common/brotli/common/platform.c
+ ../common/brotli/common/shared_dictionary.c
+ ../common/brotli/common/transform.c
+ ../common/brotli/dec/bit_reader.c
+ ../common/brotli/dec/decode.c
+ ../common/brotli/dec/huffman.c
+ ../common/brotli/dec/prefix.c
+ ../common/brotli/dec/state.c
+ ../common/brotli/dec/static_init.c
  ../common/LZMA/LzmaDecompress.c
+ ../common/LZMA/SDK/C/Bra.c
  ../common/LZMA/SDK/C/Bra86.c
+ ../common/LZMA/SDK/C/CpuArch.c
  ../common/LZMA/SDK/C/LzmaDec.c
  ../common/Tiano/EfiTianoDecompress.c
  ../common/ustring.cpp
- ../common/sha256.c
  ../common/bstrlib/bstrlib.c
  ../common/bstrlib/bstrwrap.cpp
+ ../common/generated/ami_nvar.cpp
+ ../common/generated/apple_sysf.cpp
+ ../common/generated/dell_dvar.cpp
+ ../common/generated/edk2_vss.cpp
+ ../common/generated/edk2_vss2.cpp
+ ../common/generated/edk2_ftw.cpp
+ ../common/generated/insyde_fdc.cpp
+ ../common/generated/insyde_fdm.cpp
+ ../common/generated/ms_slic_marker.cpp
+ ../common/generated/ms_slic_pubkey.cpp
+ ../common/generated/phoenix_flm.cpp
+ ../common/generated/phoenix_evsa.cpp
+ ../common/generated/intel_acbp_v1.cpp
+ ../common/generated/intel_acbp_v2.cpp
+ ../common/generated/intel_keym_v1.cpp
+ ../common/generated/intel_keym_v2.cpp
+ ../common/generated/intel_acm.cpp
+ ../common/kaitai/kaitaistream.cpp
+ ../common/digest/sha1.c
+ ../common/digest/sha256.c
+ ../common/digest/sha512.c
+ ../common/digest/sm3.c
  ../common/zlib/adler32.c
  ../common/zlib/compress.c
  ../common/zlib/crc32.c
@@ -43,48 +83,13 @@ SET(PROJECT_SOURCES
  ../common/zlib/zutil.c
 )
 
-SET(PROJECT_HEADERS
- uefifind.h
- ../common/guiddatabase.h
- ../common/basetypes.h
- ../common/descriptor.h
- ../common/gbe.h
- ../common/me.h
- ../common/ffs.h
- ../common/nvram.h
- ../common/nvramparser.h
- ../common/ffsparser.h
- ../common/ffsreport.h
- ../common/ffsutils.h
- ../common/peimage.h
- ../common/types.h
- ../common/treeitem.h
- ../common/treemodel.h
- ../common/utility.h
- ../common/LZMA/LzmaDecompress.h
- ../common/Tiano/EfiTianoDecompress.h
- ../common/ubytearray.h
- ../common/ustring.h
- ../common/bootguard.h
- ../common/sha256.h
- ../common/filesystem.h
- ../common/bstrlib/bstrlib.h
- ../common/bstrlib/bstrwrap.h
- ../common/zlib/zconf.h
- ../common/zlib/zlib.h
- ../common/zlib/crc32.h
- ../common/zlib/deflate.h
- ../common/zlib/gzguts.h
- ../common/zlib/inffast.h
- ../common/zlib/inffixed.h
- ../common/zlib/inflate.h
- ../common/zlib/inftrees.h
- ../common/zlib/trees.h
- ../common/zlib/zutil.h
- ../version.h
+ADD_EXECUTABLE(UEFIFind ${PROJECT_SOURCES} uefifind.manifest)
+
+IF(UNIX)
+ SET_TARGET_PROPERTIES(UEFIFind PROPERTIES OUTPUT_NAME uefifind)
+ENDIF()
+
+INSTALL(
+ TARGETS UEFIFind
+ RUNTIME DESTINATION bin
 )
-
-ADD_DEFINITIONS(-DU_ENABLE_NVRAM_PARSING_SUPPORT -DU_ENABLE_FIT_PARSING_SUPPORT -DU_ENABLE_GUID_DATABASE_SUPPORT)
-
-ADD_EXECUTABLE(UEFIFind ${PROJECT_SOURCES} ${PROJECT_HEADERS})
-

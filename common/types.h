@@ -27,7 +27,7 @@ namespace Actions
         Replace,
         Remove,
         Rebuild,
-        Rebase
+        Rebase,
     };
 }
 
@@ -47,18 +47,22 @@ namespace Types {
         Vss2Store,
         FtwStore,
         FdcStore,
-        FsysStore,
+        SysFStore,
         EvsaStore,
-        FlashMapStore,
+        PhoenixFlashMapStore,
+        InsydeFlashDeviceMapStore,
+        DellDvarStore,
         CmdbStore,
+        NvarGuidStore,
         NvarEntry,
         VssEntry,
-        FsysEntry,
+        SysFEntry,
         EvsaEntry,
-        FlashMapEntry,
-        Microcode,
+        PhoenixFlashMapEntry,
+        InsydeFlashDeviceMapEntry,
+        DellDvarEntry,
+        IntelMicrocode,
         SlicData,
-        // ME-specific
         IfwiHeader,
         IfwiPartition,
         FptStore,
@@ -71,21 +75,26 @@ namespace Types {
         CpdEntry,
         CpdPartition,
         CpdExtension,
-        CpdSpiEntry
+        CpdSpiEntry,
+        StartupApDataEntry,
+        DirectoryTable,
+        DirectoryTableEntry,
+        AmdMicrocode,
     };
 }
 
 namespace Subtypes {
     enum ImageSubtypes{
         IntelImage = 90,
-        UefiImage
+        UefiImage,
+        AmdImage,
     };
 
     enum CapsuleSubtypes {
         AptioSignedCapsule = 100,
         AptioUnsignedCapsule,
         UefiCapsule,
-        ToshibaCapsule
+        ToshibaCapsule,
     };
 
     enum VolumeSubtypes {
@@ -93,10 +102,11 @@ namespace Subtypes {
         Ffs2Volume,
         Ffs3Volume,
         NvramVolume,
-        MicrocodeVolume
+        AppleMicrocodeVolume,
     };
 
     enum RegionSubtypes {
+        // Intel
         DescriptorRegion = 0,
         BiosRegion,
         MeRegion,
@@ -112,13 +122,17 @@ namespace Subtypes {
         Tgbe2Region,
         Reserved1Region,
         Reserved2Region,
-        PttRegion
+        PttRegion,
+        // AMD
+        PspL1DirectoryRegion,
+        PspL2DirectoryRegion,
+        PspDirectoryFile,
     };
 
     enum PaddingSubtypes {
         ZeroPadding = 120,
         OnePadding,
-        DataPadding
+        DataPadding,
     };
 
     enum NvarEntrySubtypes {
@@ -126,7 +140,7 @@ namespace Subtypes {
         InvalidLinkNvarEntry,
         LinkNvarEntry,
         DataNvarEntry,
-        FullNvarEntry
+        FullNvarEntry,
     };
 
     enum VssEntrySubtypes {
@@ -134,12 +148,20 @@ namespace Subtypes {
         StandardVssEntry,
         AppleVssEntry,
         AuthVssEntry,
-        IntelVssEntry
+        IntelVssEntry,
     };
 
-    enum FsysEntrySubtypes {
-        InvalidFsysEntry = 150,
-        NormalFsysEntry
+    enum SysFEntrySubtypes {
+        InvalidSysFEntry = 150,
+        NormalSysFEntry,
+    };
+    
+    enum DirectorySubtypes {
+        PSPDirectory = 155,
+        ComboDirectory,
+        BIOSDirectory,
+        ISHDirectory,
+        AnyDirectory,
     };
     
     enum EvsaEntrySubtypes {
@@ -152,41 +174,53 @@ namespace Subtypes {
 
     enum FlashMapEntrySubtypes {
         VolumeFlashMapEntry = 170,
-        DataFlashMapEntry
+        DataFlashMapEntry,
+        UnknownFlashMapEntry,
+    };
+
+    enum DvarEntrySubtypes {
+        InvalidDvarEntry = 180,
+        NamespaceGuidDvarEntry,
+        NameIdDvarEntry,
+        UnknownDvarEntry
     };
 
     enum MicrocodeSubtypes {
-        IntelMicrocode = 180,
-        AmdMicrocode
+        IntelMicrocode = 190,
+        AmdMicrocode,
     };
 
     enum SlicDataSubtypes {
-        PubkeySlicData = 190,
-        MarkerSlicData
+        PubkeySlicData = 200,
+        MarkerSlicData,
     };
 
-    // ME-specific
+    // Intel ME-specific
     enum IfwiPartitionSubtypes {
-        DataIfwiPartition = 200,
-        BootIfwiPartition
+        DataIfwiPartition = 210,
+        BootIfwiPartition,
     };
 
     enum FptEntrySubtypes {
-        ValidFptEntry = 210,
-        InvalidFptEntry
+        ValidFptEntry = 220,
+        InvalidFptEntry,
     };
 
     enum FptPartitionSubtypes {
-        CodeFptPartition = 220,
+        CodeFptPartition = 230,
         DataFptPartition,
-        GlutFptPartition
+        GlutFptPartition,
     };
-	
+
     enum CpdPartitionSubtypes {
-        ManifestCpdPartition = 230,
+        ManifestCpdPartition = 240,
         MetadataCpdPartition,
         KeyCpdPartition,
-        CodeCpdPartition
+        CodeCpdPartition,
+    };
+
+    enum StartupApDataEntrySubtypes {
+        x86128kStartupApDataEntry = 250,
     };
 }
 
@@ -197,5 +231,7 @@ extern UString itemSubtypeToUString(const UINT8 type, const UINT8 subtype);
 extern UString compressionTypeToUString(const UINT8 algorithm);
 extern UString regionTypeToUString(const UINT8 type);
 extern UString fitEntryTypeToUString(const UINT8 type);
+extern UString hashTypeToUString(const UINT16 digest_agorithm_id);
+extern UString insydeFlashDeviceMapEntryTypeGuidToUString(const EFI_GUID & guid);
 
 #endif // TYPES_H

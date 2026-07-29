@@ -41,27 +41,8 @@ USTATUS UEFIDumper::dump(const UByteArray & buffer, const UString & inPath, cons
         USTATUS result = ffsParser.parse(buffer);
         if (result)
             return result;
-        // Show ffsParser messages
-        std::vector<std::pair<UString, UModelIndex> > messages = ffsParser.getMessages();
-        for (size_t i = 0; i < messages.size(); i++) {
-            std::cout << messages[i].first << std::endl;
-        }
 
-        // Show FIT table
-        std::vector<std::pair<std::vector<UString>, UModelIndex > > fitTable = ffsParser.getFitTable();
-        if (fitTable.size()) {
-            std::cout << "-------------------------------------------------------------------------" << std::endl;
-            std::cout << "     Address       |   Size    |  Ver  | CS  |         Type / Info         " << std::endl;
-            std::cout << "-------------------------------------------------------------------------" << std::endl;
-            for (size_t i = 0; i < fitTable.size(); i++) {
-                std::cout << fitTable[i].first[0].toLocal8Bit() << " | "
-                    << fitTable[i].first[1].toLocal8Bit() << " | "
-                    << fitTable[i].first[2].toLocal8Bit() << " | "
-                    << fitTable[i].first[3].toLocal8Bit() << " | "
-                    << fitTable[i].first[4].toLocal8Bit() << " | "
-                    << fitTable[i].first[5].toLocal8Bit() << std::endl;
-            }
-        }
+        ffsParser.outputInfo();
 
         // Create ffsReport
         FfsReport ffsReport(&model);
@@ -104,65 +85,59 @@ USTATUS UEFIDumper::recursiveDump(const UModelIndex & index)
     if (!index.isValid())
         return U_INVALID_PARAMETER;
 
-    //UByteArray itemHeader = model.header(index);
-    //UByteArray fileHeader = model.header(model.findParentOfType(index, Types::File));
-
-    //if (guid.length() == 0 ||
-    //    (itemHeader.size() >= sizeof (EFI_GUID) && guidToUString(*(const EFI_GUID*)itemHeader.constData()) == guid) ||
-    //    (fileHeader.size() >= sizeof(EFI_GUID) && guidToUString(*(const EFI_GUID*)fileHeader.constData()) == guid)) {
-
-        // Construct file name
-        UString orgName = uniqueItemName(index);
-        UString name = orgName;
-        bool nameFound = false;
-        for (int i = 1; i < 1000; ++i) {
-            if (!isExistOnFs(name + UString("_info.txt"))) {
-                nameFound = true;
-                break;
-            }
-            name = orgName + UString("_") + usprintf("%03d", i);
+    // Construct file name
+    UString orgName = uniqueItemName(index);
+    UString name = orgName;
+    bool nameFound = false;
+    for (int i = 1; i < 1000; ++i) {
+        if (!isExistOnFs(name + UString("_info.txt"))) {
+            nameFound = true;
+            break;
         }
-
-        if (!nameFound)
-            return U_INVALID_PARAMETER; //TODO: replace with proper errorCode
-
-        // Add header and body only for leaf sections
-        if (model.rowCount(index) == 0) {
-            // Header
-            UByteArray data = model.header(index);
-            if (!data.isEmpty()) {
-                std::ofstream file;
-                UString str = name + UString("_header.bin");
-                file.open(str.toLocal8Bit(), std::ios::out | std::ios::binary);
-                file.write(data.constData(), data.size());
-                file.close();
-            }
-
-            // Body
-            data = model.body(index);
-            if (!data.isEmpty()) {
-                std::ofstream file;
-                UString str = name + UString("_body.bin");
-                file.open(str.toLocal8Bit(), std::ios::out | std::ios::binary);
-                file.write(data.constData(), data.size());
-                file.close();
-            }
+        name = orgName + UString("_") + usprintf("%03d", i);
+    }
+    
+    if (!nameFound) {
+        printf("Cannot find unique name for \"%s\".\n", (const char*)orgName.toLocal8Bit());
+        return U_ITEM_NOT_FOUND;
+    }
+    
+    // Add header and body only for leaf sections
+    if (model.rowCount(index) == 0) {
+        // Header
+        UByteArray data = model.header(index);
+        if (!data.isEmpty()) {
+            std::ofstream file;
+            UString str = name + UString("_header.bin");
+            file.open(str.toLocal8Bit(), std::ios::out | std::ios::binary);
+            file.write(data.constData(), data.size());
+            file.close();
         }
-        // Info
-        UString info = "Type: " + itemTypeToUString(model.type(index)) + "\n" +
-            "Subtype: " + itemSubtypeToUString(model.type(index), model.subtype(index)) + "\n";
-        if (model.text(index).length() > 0)
-            info += "Text: " + model.text(index) + "\n";
-        info += model.info(index) + "\n";
-
-        std::ofstream file;
-        UString str = name + UString("_info.txt");
-        file.open(str.toLocal8Bit(), std::ios::out);
-        file.write(info.toLocal8Bit(), info.length());
-        file.close();
-
-        dumped = true;
-    //}
+        
+        // Body
+        data = model.body(index);
+        if (!data.isEmpty()) {
+            std::ofstream file;
+            UString str = name + UString("_body.bin");
+            file.open(str.toLocal8Bit(), std::ios::out | std::ios::binary);
+            file.write(data.constData(), data.size());
+            file.close();
+        }
+    }
+    // Info
+    UString info = "Type: " + itemTypeToUString(model.type(index)) + "\n" +
+    "Subtype: " + itemSubtypeToUString(model.type(index), model.subtype(index)) + "\n";
+    if (model.text(index).length() > 0)
+        info += "Text: " + model.text(index) + "\n";
+    info += model.info(index) + "\n";
+    
+    std::ofstream file;
+    UString str = name + UString("_info.txt");
+    file.open(str.toLocal8Bit(), std::ios::out);
+    file.write(info.toLocal8Bit(), info.length());
+    file.close();
+    
+    dumped = true;
     
     // Process child items
     USTATUS result;

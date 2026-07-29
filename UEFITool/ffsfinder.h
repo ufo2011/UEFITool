@@ -15,7 +15,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define FFSFINDER_H
 
 #include <vector>
-#include <QRegExp>
 
 #include "../common/ubytearray.h"
 #include "../common/ustring.h"
@@ -31,9 +30,9 @@ public:
     std::vector<std::pair<UString, UModelIndex> > getMessages() const { return messagesVector; }
     void clearMessages() { messagesVector.clear(); }
 
-    USTATUS findHexPattern(const UModelIndex & index, const UByteArray & hexPattern, const UINT8 mode);
-    USTATUS findGuidPattern(const UModelIndex & index, const UByteArray & guidPattern, const UINT8 mode);
-    USTATUS findTextPattern(const UModelIndex & index, const UString & pattern, const UINT8 mode, const bool unicode, const Qt::CaseSensitivity caseSensitive);
+    USTATUS findHexPattern(const UByteArray & hexPattern, const UINT8 mode);
+    USTATUS findGuidPattern(const UByteArray & guidPattern, const UINT8 mode);
+    USTATUS findTextPattern(const UString & pattern, const UINT8 mode, const bool unicode, const Qt::CaseSensitivity caseSensitive);
 
 private:
     const TreeModel* model;
@@ -42,6 +41,10 @@ private:
     void msg(const UString & message, const UModelIndex &index = UModelIndex()) {
         messagesVector.push_back(std::pair<UString, UModelIndex>(message, index));
     }
+
+    USTATUS findHexPattern(const UModelIndex & index, const UByteArray & hexPattern, const UINT8 mode);
+    USTATUS findGuidPattern(const UModelIndex & index, const UByteArray & guidPattern, const UINT8 mode);
+    USTATUS findTextPattern(const UModelIndex & index, const UString & pattern, const UINT8 mode, const bool unicode, const Qt::CaseSensitivity caseSensitive);
 };
 
 #endif // FFSFINDER_H
